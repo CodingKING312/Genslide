@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="monetag" content="d09d7d5aa8aaa90aeb76d5336a04e531">
+    <title>GenSlide - Engineered by Abdull Manan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --brand-primary: #6366f1;
+            --brand-accent: #f43f5e;
+            --bg-deep: #010208;
+            --slide-bg: #050811;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-deep);
+            color: #f8fafc;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* --- Animations --- */
+        @keyframes reveal {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes progress-linear {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+
+        .reveal-node {
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+            transform: translateY(30px);
+        }
+
+        .reveal-node.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .app-view { 
+            display: none; 
+            opacity: 0;
+            transform: scale(0.98);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .app-view.active { 
+            display: flex; 
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .glass-sidebar {
+            background: rgba(2, 6, 23, 0.95);
+            backdrop-filter: blur(40px);
+            border-right: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .title-ultra {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            line-height: 0.95;
+            font-size: clamp(1.5rem, 4vw, 4rem);
+            background: linear-gradient(135deg, #ffffff 60%, rgba(255,255,255,0.4) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .luxury-badge {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--brand-primary);
+            display: inline-block;
+        }
+
+        .slide-canvas {
+            aspect-ratio: 16 / 9;
+            background: var(--slide-bg);
+            border-radius: 32px;
+            box-shadow: 0 40px 100px -20px rgba(0,0,0,0.8);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .playback-bar {
+            height: 2px;
+            background: var(--brand-primary);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            z-index: 50;
+        }
+
+        .is-playing .playback-bar {
+            animation: progress-linear 5s linear infinite;
+        }
+
+        .export-group:hover .export-menu { display: block; }
+        .export-menu {
+            display: none;
+            position: absolute;
+            background: #0d1117;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 8px;
+            z-index: 100;
+            width: 160px;
+            top: 100%;
+            left: 0;
+            animation: reveal 0.2s ease-out;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: var(--brand-primary);
+            background: rgba(255, 255, 255, 0.04);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LANDING VIEW -->
+    <div id="landing-view" class="app-view active flex-col w-full min-h-screen">
+        <nav class="flex items-center justify-between px-6 lg:px-20 py-6 fixed top-0 w-full z-[100] bg-[#010208]/80 backdrop-blur-xl border-b border-white/5">
+            <div class="flex items-center gap-3">
+                <img src="https://res.cloudinary.com/diioj6rss/image/upload/v1769532692/Gemini_Generated_Image_arw71yarw71yarw7-removebg-preview_ey9skq.png" class="w-10 h-10 object-contain">
+                <span class="font-black text-xl tracking-tighter uppercase">GenSlide</span>
+            </div>
+            <div class="hidden md:flex gap-8 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <a href="#about" class="hover:text-white transition">About</a>
+                <a href="#motivation" class="hover:text-white transition">Motivation</a>
+                <a href="#founder" class="hover:text-white transition">The Architect</a>
+                <a href="#reviews" class="hover:text-white transition">Reviews</a>
+            </div>
+            <button onclick="enterApp()" class="bg-indigo-600 text-white text-[10px] font-black px-6 py-3 rounded-full uppercase tracking-widest hover:bg-white hover:text-black transition-all">Launch Engine</button>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="pt-56 pb-32 px-6 lg:px-20 flex flex-col items-center justify-center text-center">
+            <div class="reveal-node" data-delay="0"><div class="luxury-badge mb-6">Engineered for Success</div></div>
+            <h1 class="title-ultra !text-[12vw] lg:!text-[8vw] mb-8 leading-none reveal-node" data-delay="200">Command <br>Visuals.</h1>
+            <p class="text-slate-400 text-sm lg:text-lg max-w-2xl mb-12 reveal-node" data-delay="400">Transform strategic intent into board-ready presentations instantly with neural synthesis.</p>
+            <div class="flex flex-col sm:flex-row gap-4 reveal-node" data-delay="600">
+                <button onclick="enterApp()" class="px-12 py-6 bg-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-105 transition shadow-2xl shadow-indigo-500/40">Start Synthesizing</button>
+                <a href="#founder" class="px-12 py-6 bg-white/5 border border-white/10 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white/10 transition text-center">Meet Founder</a>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-32 px-6 lg:px-40 bg-white/[0.01]">
+            <div class="grid lg:grid-cols-2 gap-20 items-center">
+                <div class="reveal-node">
+                    <div class="luxury-badge mb-6">Our DNA</div>
+                    <h2 class="text-4xl lg:text-6xl font-black uppercase tracking-tighter mb-8 italic">The Future of <br><span class="text-indigo-500">Persuasion.</span></h2>
+                    <p class="text-slate-400 leading-relaxed mb-6">GenSlide removes the barrier of design, allowing visionaries to focus on strategy while we handle the aesthetic narrative.</p>
+                    <div class="flex gap-8">
+                        <div><div class="text-2xl font-black text-white">50k+</div><div class="text-[9px] text-slate-500 uppercase tracking-widest">Decks Generated</div></div>
+                        <div><div class="text-2xl font-black text-white">99%</div><div class="text-[9px] text-slate-500 uppercase tracking-widest">Time Saved</div></div>
+                    </div>
+                </div>
+                <div class="glass-card aspect-square flex items-center justify-center p-12 reveal-node">
+                    <img src="https://res.cloudinary.com/diioj6rss/image/upload/v1769532692/Gemini_Generated_Image_arw71yarw71yarw7-removebg-preview_ey9skq.png" class="w-full opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
+                </div>
+            </div>
+        </section>
+
+        <!-- Motivation Section -->
+        <section id="motivation" class="py-32 px-6 lg:px-40 border-t border-white/5">
+            <div class="text-center mb-20 reveal-node">
+                <div class="luxury-badge mb-6">The Why</div>
+                <h2 class="text-4xl lg:text-6xl font-black uppercase tracking-tighter">Engineered <br><span class="text-indigo-500">Efficiency.</span></h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass-card p-10 reveal-node">
+                    <i class="fas fa-bolt text-indigo-500 text-3xl mb-6"></i>
+                    <h3 class="font-black uppercase tracking-tighter mb-4">Neural Speed</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">What used to take hours of manual alignment now takes seconds of neural computation.</p>
+                </div>
+                <div class="glass-card p-10 reveal-node">
+                    <i class="fas fa-eye text-indigo-500 text-3xl mb-6"></i>
+                    <h3 class="font-black uppercase tracking-tighter mb-4">Visual Logic</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Every pixel is placed with intent, ensuring your audience stays engaged with the narrative.</p>
+                </div>
+                <div class="glass-card p-10 reveal-node">
+                    <i class="fas fa-layer-group text-indigo-500 text-3xl mb-6"></i>
+                    <h3 class="font-black uppercase tracking-tighter mb-4">Pure Focus</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Spend your energy on the "What" and "Why"—let GenSlide handle the complex "How" of design.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Founder Section -->
+        <section id="founder" class="py-32 px-6 lg:px-40 bg-indigo-600/5">
+            <div class="flex flex-col lg:flex-row items-center gap-20">
+                <div class="w-full lg:w-1/2 reveal-node">
+                    <div class="relative group">
+                        <div class="absolute -inset-4 bg-indigo-500/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                        <div class="relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl bg-slate-900">
+                            <img src="https://res.cloudinary.com/diioj6rss/image/upload/v1769410539/Generated_Image_September_01_2025_-_9_01AM_vwgduq.jpg" alt="Abdull Manan - Founder" class="w-full h-auto grayscale group-hover:grayscale-0 transition-all duration-1000 transform group-hover:scale-105">
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full lg:w-1/2 reveal-node">
+                    <div class="luxury-badge mb-6">The Architect</div>
+                    <h2 class="text-4xl lg:text-6xl font-black uppercase tracking-tighter mb-8 italic">Abdull <span class="text-indigo-500">Manan</span></h2>
+                    <p class="text-slate-300 text-lg leading-relaxed mb-8 font-light italic">"My mission was simple: eliminate the friction between a great idea and a stunning presentation. GenSlide is the realization of that goal—a neural bridge for high-stakes storytelling. We aren't just building a tool; we're building a new standard for visual communication."</p>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition"><i class="fas fa-globe"></i></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reviews Section -->
+        <section id="reviews" class="py-32 px-6 lg:px-40 border-t border-white/5">
+            <div class="text-center mb-20 reveal-node">
+                <div class="luxury-badge mb-6">Social Proof</div>
+                <h2 class="text-4xl lg:text-6xl font-black uppercase tracking-tighter">Trusted by <br><span class="text-indigo-500">Disruptors.</span></h2>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="glass-card p-8 reveal-node">
+                    <div class="flex text-amber-400 mb-6"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <p class="text-slate-300 italic mb-8">"GenSlide literally saved my seed round pitch. The visuals were so sharp, investors thought I had a dedicated design agency."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center font-bold">JD</div>
+                        <div>
+                            <div class="text-[10px] font-black uppercase tracking-widest text-white">Jason Drack</div>
+                            <div class="text-[8px] font-bold uppercase tracking-widest text-slate-500">Founder, NexaLoop</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card p-8 reveal-node">
+                    <div class="flex text-amber-400 mb-6"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <p class="text-slate-300 italic mb-8">"The split-layout synthesis is a game changer for technical reviews. Clean, authoritative, and incredibly fast."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center font-bold">SK</div>
+                        <div>
+                            <div class="text-[10px] font-black uppercase tracking-widest text-white">Sarah Koenig</div>
+                            <div class="text-[8px] font-bold uppercase tracking-widest text-slate-500">CTO, Vertex AI</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card p-8 reveal-node">
+                    <div class="flex text-amber-400 mb-6"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                    <p class="text-slate-300 italic mb-8">"Finally, an AI tool that understands hierarchy and whitespace. Abdull Manan has engineered a masterpiece."</p>
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-rose-500/20 flex items-center justify-center font-bold">ML</div>
+                        <div>
+                            <div class="text-[10px] font-black uppercase tracking-widest text-white">Marcus Low</div>
+                            <div class="text-[8px] font-bold uppercase tracking-widest text-slate-500">VP Design, MetaGrid</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="py-20 px-6 lg:px-40 border-t border-white/5 text-center">
+            <img src="https://res.cloudinary.com/diioj6rss/image/upload/v1769532692/Gemini_Generated_Image_arw71yarw71yarw7-removebg-preview_ey9skq.png" class="w-12 mx-auto mb-8 grayscale opacity-20">
+            <p class="text-[9px] font-black text-slate-600 uppercase tracking-[0.5em]">&copy; 2024 GenSlide Neural Engine. All Rights Reserved. Engineered by Abdull Manan.</p>
+        </footer>
+    </div>
+
+    <!-- APP VIEW -->
+    <div id="app-view" class="app-view h-screen w-screen relative overflow-hidden">
+        <aside class="w-[420px] glass-sidebar z-50 flex flex-col p-8 shadow-2xl">
+            <div class="flex items-center gap-4 mb-12 cursor-pointer" onclick="exitToLanding()">
+                <img src="https://res.cloudinary.com/diioj6rss/image/upload/v1769532692/Gemini_Generated_Image_arw71yarw71yarw7-removebg-preview_ey9skq.png" class="w-10 h-10 object-contain">
+                <div>
+                    <h1 class="text-sm font-black tracking-tighter text-white uppercase">GenSlide</h1>
+                    <p class="text-[8px] text-slate-500 font-bold tracking-widest uppercase italic">by Abdull Manan</p>
+                </div>
+            </div>
+
+            <div class="flex-1 space-y-8 overflow-y-auto pr-2">
+                <div class="space-y-4">
+                    <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Topic</h2>
+                    <textarea id="main-prompt" class="w-full h-32 bg-white/5 border border-white/10 rounded-2xl p-6 text-sm outline-none resize-none text-slate-300 font-medium" placeholder="Ex: Future of AI in Healthcare"></textarea>
+                </div>
+
+                <div id="deck-navigation" class="hidden space-y-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h2 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Neural Frames</h2>
+                        <div class="export-group relative">
+                            <button class="text-[10px] font-black text-emerald-400 uppercase tracking-widest hover:text-white transition flex items-center gap-1">
+                                <i class="fas fa-file-export"></i> Save Deck
+                            </button>
+                            <div class="export-menu">
+                                <button onclick="exportAs('pdf')" class="w-full text-left p-2 hover:bg-white/5 rounded text-[9px] font-bold text-slate-400 hover:text-white flex items-center gap-2">
+                                    <i class="fas fa-file-pdf text-red-400"></i> PDF Document
+                                </button>
+                                <button onclick="exportAs('html')" class="w-full text-left p-2 hover:bg-white/5 rounded text-[9px] font-bold text-slate-400 hover:text-white flex items-center gap-2">
+                                    <i class="fas fa-code text-blue-400"></i> Animated HTML
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="slide-items-container" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <button id="gen-btn" onclick="dominateIndustry()" class="w-full bg-white text-black py-6 rounded-2xl font-black mt-6 hover:bg-indigo-600 hover:text-white transition-all shadow-xl">
+                SYNTHESIZE DECK
+            </button>
+        </aside>
+
+        <main class="flex-1 relative flex flex-col bg-[#020617] items-center justify-center p-8">
+            <div id="main-canvas" class="slide-canvas">
+                <div id="stage-content" class="h-full w-full flex items-center justify-center">
+                    <p class="text-white font-black uppercase text-[10px] tracking-[0.5em] opacity-20">Ready for Strategy...</p>
+                </div>
+                <div class="playback-bar"></div>
+            </div>
+
+            <div id="navigator" class="hidden absolute bottom-12 self-center flex items-center gap-8 bg-black/40 backdrop-blur-2xl px-8 py-4 rounded-full border border-white/5 z-40">
+                <button onclick="prev()" class="text-slate-500 hover:text-white"><i class="fas fa-chevron-left"></i></button>
+                <button onclick="toggleAutoplay()" class="w-10 h-10 flex items-center justify-center text-indigo-400">
+                    <i id="play-icon" class="fas fa-play"></i>
+                </button>
+                <div id="slide-indicator" class="text-[10px] font-black tracking-[0.2em] uppercase text-indigo-400">FRAME 01 // 05</div>
+                <button onclick="next()" class="text-slate-500 hover:text-white"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const apiKey = ""; 
+        let deck = [];
+        let index = 0;
+        let isAutoplaying = false;
+        let autoplayTimer = null;
+
+        function setupObservers() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { 
+                    if (entry.isIntersecting) entry.target.classList.add('visible');
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.reveal-node').forEach(node => observer.observe(node));
+        }
+
+        function enterApp() {
+            document.getElementById('landing-view').classList.remove('active');
+            document.getElementById('app-view').classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function exitToLanding() {
+            document.getElementById('app-view').classList.remove('active');
+            document.getElementById('landing-view').classList.add('active');
+        }
+
+        async function dominateIndustry() {
+            const query = document.getElementById('main-prompt').value;
+            if (!query.trim()) return;
+            const btn = document.getElementById('gen-btn');
+            btn.disabled = true; btn.innerText = "SYNTHESIZING...";
+
+            try {
+                // Step 1: Content Synthesis
+                const geminiResult = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: `Generate 5 slides about ${query}. Return JSON array of objects with {headline, points[], layoutType (either 'monolith' or 'split'), imagePrompt}.` }] }],
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
+                }).then(r => r.json());
+
+                const rawSlides = JSON.parse(geminiResult.candidates[0].content.parts[0].text);
+                
+                // Step 2: Visual Synthesis
+                deck = await Promise.all(rawSlides.map(async (slide) => {
+                    const img = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ instances: [{ prompt: slide.imagePrompt }] })
+                    }).then(r => r.json()).catch(() => null);
+                    
+                    return { 
+                        ...slide, 
+                        imageUrl: img?.predictions?.[0]?.bytesBase64Encoded ? 
+                        `data:image/png;base64,${img.predictions[0].bytesBase64Encoded}` : 
+                        'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920' 
+                    };
+                }));
+
+                index = 0;
+                document.getElementById('deck-navigation').classList.remove('hidden');
+                document.getElementById('navigator').classList.remove('hidden');
+                renderDeckList(); 
+                renderSlide(); 
+                startAutoplay();
+            } catch (err) { 
+                console.error(err); 
+            } finally { 
+                btn.disabled = false; btn.innerText = "SYNTHESIZE DECK"; 
+            }
+        }
+
+        function toggleAutoplay() { isAutoplaying ? stopAutoplay() : startAutoplay(); }
+        
+        function startAutoplay() {
+            if (!deck.length) return;
+            isAutoplaying = true;
+            document.body.classList.add('is-playing');
+            document.getElementById('play-icon').className = 'fas fa-pause';
+            autoplayTimer = setInterval(() => { 
+                index = (index + 1) % deck.length; 
+                renderSlide(); 
+                renderDeckList(); 
+            }, 5000);
+        }
+
+        function stopAutoplay() {
+            isAutoplaying = false;
+            document.body.classList.remove('is-playing');
+            document.getElementById('play-icon').className = 'fas fa-play';
+            if (autoplayTimer) clearInterval(autoplayTimer);
+        }
+
+        function renderDeckList() {
+            const cont = document.getElementById('slide-items-container');
+            cont.innerHTML = deck.map((s, i) => `
+                <div onclick="index=${i};renderSlide();renderDeckList();stopAutoplay();" class="p-3 cursor-pointer rounded-xl flex items-center gap-3 ${index === i ? 'bg-indigo-600/20 border border-indigo-500/30' : 'hover:bg-white/5'}">
+                    <span class="text-[9px] font-black ${index === i ? 'text-indigo-400' : 'text-slate-700'}">0${i+1}</span>
+                    <span class="text-[9px] font-bold text-slate-400 truncate uppercase">${s.headline}</span>
+                </div>
+            `).join('');
+        }
+
+        function getSlideHTML(s, idx, isExport = false) {
+            const badge = `<div class="luxury-badge mb-4">FRAME 0${idx+1}</div>`;
+            const points = s.points.map((p, i) => `<p class="text-xs lg:text-sm text-slate-200 font-medium tracking-wide border-l-2 border-indigo-500 pl-4 uppercase" style="${isExport ? '' : `animation: reveal 0.5s ease-out forwards; animation-delay: ${0.4 + i*0.1}s;`}">${p}</p>`).join('');
+            
+            const layout = s.layoutType === 'monolith' ? 
+                `<div class="relative h-full w-full flex items-center justify-center p-12 overflow-hidden bg-black">
+                    <img src="${s.imageUrl}" class="absolute inset-0 w-full h-full object-cover brightness-[0.3]">
+                    <div class="relative z-10 flex flex-col items-center text-center">
+                        ${badge}
+                        <h1 class="title-ultra">${s.headline}</h1>
+                        <div class="mt-8 space-y-4">${points}</div>
+                    </div>
+                </div>` : 
+                `<div class="relative h-full w-full flex bg-black">
+                    <div class="w-1/2 p-16 flex flex-col justify-center border-r border-white/5">
+                        ${badge}
+                        <h1 class="title-ultra !text-left">${s.headline}</h1>
+                        <div class="space-y-4 mt-8">${points}</div>
+                    </div>
+                    <div class="w-1/2 relative"><img src="${s.imageUrl}" class="w-full h-full object-cover opacity-60"></div>
+                </div>`;
+
+            return isExport ? `<div class="slide-print-unit" style="height:100vh; width:100vw; break-after:page; display:flex; align-items:center; justify-content:center; background:black;">${layout}</div>` : layout;
+        }
+
+        function renderSlide() {
+            const s = deck[index];
+            if(!s) return;
+            document.getElementById('stage-content').innerHTML = getSlideHTML(s, index);
+            document.getElementById('slide-indicator').innerText = `FRAME 0${index+1} // 0${deck.length}`;
+        }
+
+        function next() { stopAutoplay(); index = (index + 1) % deck.length; renderSlide(); renderDeckList(); }
+        function prev() { stopAutoplay(); index = (index - 1 + deck.length) % deck.length; renderSlide(); renderDeckList(); }
+
+        function exportAs(format) {
+            if (!deck.length) return;
+            const slidesHTML = deck.map((s, i) => getSlideHTML(s, i, true)).join('');
+            
+            if (format === 'pdf') {
+                const pdfHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><script src="https://cdn.tailwindcss.com"><\/script><style>${document.querySelector('style').innerHTML} @media print { @page { size: 1920px 1080px; margin: 0; } body { background: black !important; -webkit-print-color-adjust: exact; } } body { margin:0; background:black; }</style></head><body>${slidesHTML}<script>window.onload = () => { setTimeout(() => { window.print(); }, 500); };<\/script></body></html>`;
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(new Blob([pdfHTML], { type: 'text/html' }));
+                a.download = `GenSlide_Print_Ready_Deck.html`;
+                a.click();
+            } else if (format === 'html') {
+                const standalone = `<!DOCTYPE html><html><head><meta charset="UTF-8"><script src="https://cdn.tailwindcss.com"><\/script><style>${document.querySelector('style').innerHTML} body, html { margin: 0; padding: 0; overflow: hidden; background: #000; color: white; } .slide-container.active { display: flex !important; animation: reveal 0.8s ease-out; } .progress-indicator { position: fixed; bottom: 0; left: 0; height: 4px; background: #6366f1; transition: width 0.1s linear; z-index: 1000; }</style></head><body><div id="deck-wrapper">${deck.map((s, i) => `<div class="slide-container" style="display:none;height:100vh;width:100vw">${getSlideHTML(s, i, true)}</div>`).join('')}</div><div class="progress-indicator" id="p-bar"></div><script>let curr = 0; const slides = document.querySelectorAll('.slide-container'); const bar = document.getElementById('p-bar'); function showSlide(idx) { slides.forEach((s, i) => s.classList.toggle('active', i === idx)); bar.style.width = '0%'; } function next() { curr = (curr + 1) % slides.length; showSlide(curr); startTime = Date.now(); } window.addEventListener('keydown', (e) => { if(e.key === 'ArrowRight' || e.key === ' ') next(); }); let startTime = Date.now(); setInterval(() => { let elapsed = Date.now() - startTime; let p = (elapsed % 5000) / 5000; bar.style.width = (p * 100) + '%'; if(elapsed >= 5000) next(); }, 50); showSlide(0);<\/script></body></html>`;
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(new Blob([standalone], { type: 'text/html' }));
+                a.download = `GenSlide_Animated_Deck.html`;
+                a.click();
+            }
+        }
+
+        window.onload = setupObservers;
+    </script>
+</body>
+</html>
